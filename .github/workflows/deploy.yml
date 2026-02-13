@@ -65,4 +65,16 @@ jobs:
           docker compose pull
           docker compose up -d
           docker image prune -f
+
+          echo "--- Compose status ---"
+          docker compose ps
+
+          echo "--- Listening sockets ---"
+          ss -ltnp | grep -E '(:80|:5000)' || true
+
+          echo "--- Local curl (should return your Flask text) ---"
+          curl -sS -m 5 http://127.0.0.1:80 || true
+
+          echo "--- Recent logs from container ---"
+          docker logs --tail=100 flask_hello || true
           EOF
