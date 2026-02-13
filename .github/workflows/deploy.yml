@@ -47,18 +47,22 @@ jobs:
           set -e
           mkdir -p ~/app
           cd ~/app
-          # Ensure compose file exists with correct image ref
-          if [ ! -f docker-compose.yml ]; then
-            cat > docker-compose.yml << 'YAML'
-            services:
-              web:
-                image: ${DOCKERHUB_USER}/flask-hello-aws:latest
-                container_name: flask_hello
-                ports:
-                  - "80:5000"
-                restart: unless-stopped
-            YAML
-          fi
+
+          # Provide env for docker compose variable expansion
+          echo "DOCKERHUB_USER=${{ secrets.DOCKERHUB_USERNAME }}" > .env
+
+          # Write docker-compose.yml (avoid nested heredoc issues)
+          printf '%s\n' \
+          "services:" \
+          "  web:" \
+          "    image: \${DOCKERHUB_USER}/flask-hello-aws:latest" \
+          "    container_name: flask_hello" \
+          "    ports:" \
+          "      - \"80:5000\"" \
+          "    restart: unless-stopped" > docker-compose.yml
+
+          # Pull latest image and start/restart container
           docker compose pull
+          docker compose up -d
           docker image prune -f
           EOF
