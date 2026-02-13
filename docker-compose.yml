@@ -1,0 +1,8 @@
+
+services:
+  web:
+    image: fxx40a3/flask-hello-aws:latest
+    container_name: flask_hello
+    ports:
+      - "80:5000"
+    restart: unless-stopped
